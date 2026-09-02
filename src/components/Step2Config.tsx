@@ -22,16 +22,16 @@ interface Step2ConfigProps {
 }
 
 const COMMON_TIMEZONES = [
-  { value: 'America/Toronto', label: 'America/Toronto (TMU, U of T, York, McMaster - EST/EDT)' },
-  { value: 'America/Vancouver', label: 'America/Vancouver (UBC, SFU, UVic - PST/PDT)' },
-  { value: 'America/Edmonton', label: 'America/Edmonton (U of Alberta, Calgary - MST/MDT)' },
-  { value: 'America/Montreal', label: 'America/Montreal (McGill, Concordia - EST/EDT)' },
-  { value: 'America/New_York', label: 'America/New_York (US Eastern Time)' },
-  { value: 'America/Chicago', label: 'America/Chicago (US Central Time)' },
-  { value: 'America/Los_Angeles', label: 'America/Los_Angeles (US Pacific Time)' },
-  { value: 'America/Winnipeg', label: 'America/Winnipeg (U of Manitoba - CST/CDT)' },
-  { value: 'America/Halifax', label: 'America/Halifax (Dalhousie - AST/ADT)' },
-  { value: 'Asia/Ho_Chi_Minh', label: 'Asia/Ho_Chi_Minh (Việt Nam - GMT+7)' },
+  { value: 'America/Toronto', label: '🇨🇦 America/Toronto (Mặc định - TMU, Toronto, Ontario - EST/EDT)' },
+  { value: 'America/Vancouver', label: '🇨🇦 America/Vancouver (UBC, SFU, UVic - British Columbia - PST/PDT)' },
+  { value: 'America/Edmonton', label: '🇨🇦 America/Edmonton (U of Alberta, Calgary - Alberta - MST/MDT)' },
+  { value: 'America/Montreal', label: '🇨🇦 America/Montreal (McGill, Concordia - Quebec - EST/EDT)' },
+  { value: 'America/Winnipeg', label: '🇨🇦 America/Winnipeg (U of Manitoba - Manitoba - CST/CDT)' },
+  { value: 'America/Halifax', label: '🇨🇦 America/Halifax (Dalhousie - Nova Scotia - AST/ADT)' },
+  { value: 'America/New_York', label: '🇺🇸 America/New_York (US Eastern Time)' },
+  { value: 'America/Chicago', label: '🇺🇸 America/Chicago (US Central Time)' },
+  { value: 'America/Los_Angeles', label: '🇺🇸 America/Los_Angeles (US Pacific Time)' },
+  { value: 'Asia/Ho_Chi_Minh', label: '🇻🇳 Asia/Ho_Chi_Minh (Việt Nam - GMT+7)' },
 ];
 
 export const Step2Config: React.FC<Step2ConfigProps> = ({

@@ -41,14 +41,8 @@ export function App() {
     setClientId(getSavedClientId());
   }, []);
 
-  const defaultTimezone = useMemo(() => {
-    try {
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      return tz || 'America/Toronto';
-    } catch {
-      return 'America/Toronto';
-    }
-  }, []);
+  // Mặc định luôn theo múi giờ Canada (Toronto - EST/EDT) cho trường TMU
+  const defaultTimezone = 'America/Toronto';
 
   // Semester Config state
   const [config, setConfig] = useState<SemesterConfig>({

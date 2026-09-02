@@ -270,15 +270,61 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
 
         {/* Error message */}
         {syncStatus === 'error' && (
-          <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-3 text-rose-800 text-xs sm:text-sm">
-            <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
-            <div className="space-y-1">
-              <p className="font-semibold">Đồng bộ thất bại</p>
-              <p className="text-xs text-rose-700">{errorMessage}</p>
+          <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-xs sm:text-sm text-rose-800 space-y-3">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="font-bold">Đồng bộ thất bại</p>
+                <p className="text-xs text-rose-700 font-mono">{errorMessage}</p>
+              </div>
+            </div>
+
+            {errorMessage.toLowerCase().includes('admin_policy_enforced') ||
+            errorMessage.toLowerCase().includes('third-party') ? (
+              <div className="bg-white/80 p-3.5 rounded-xl border border-rose-200 text-xs space-y-2 text-slate-800">
+                <p className="font-bold text-rose-700 flex items-center gap-1.5">
+                  🏫 Chính sách bảo mật tài khoản trường TMU (@torontomu.ca):
+                </p>
+                <p className="text-slate-600 leading-relaxed">
+                  Quản trị viên IT trường TMU (CCS) mặc định chặn các ứng dụng web bên ngoài kết nối OAuth trực tiếp vào tài khoản trường.
+                </p>
+                <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-200 text-emerald-900 space-y-1.5">
+                  <p className="font-bold flex items-center gap-1">
+                    👉 Giải pháp cực nhanh (Không bị trường chặn):
+                  </p>
+                  <ol className="list-decimal list-inside space-y-1 text-slate-700 text-[11px]">
+                    <li>
+                      Bấm nút <strong>Tải file .ics</strong> ngay bên dưới.
+                    </li>
+                    <li>
+                      Mở Google Calendar bằng email trường:{' '}
+                      <a
+                        href="https://calendar.google.com"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-indigo-600 underline font-semibold"
+                      >
+                        calendar.google.com
+                      </a>
+                    </li>
+                    <li>
+                      Tại cột bên trái, bấm dấu <strong>+</strong> cạnh mục <em>Other calendars</em> &gt; chọn <strong>Import (Nhập)</strong> file .ics vừa tải.
+                    </li>
+                  </ol>
+                  <button
+                    onClick={handleDownloadIcs}
+                    className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition-colors"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    Tải file .ics ngay bây giờ
+                  </button>
+                </div>
+              </div>
+            ) : (
               <p className="text-xs text-slate-500 pt-1">
                 Gợi ý: Nếu gặp lỗi OAuth origin, hãy kiểm tra lại <em>Authorized JavaScript origins</em> trên Google Cloud Console đã bao gồm đúng URL hiện tại chưa, hoặc bạn có thể dùng nút <strong>Tải file .ics</strong> bên dưới.
               </p>
-            </div>
+            )}
           </div>
         )}
 
