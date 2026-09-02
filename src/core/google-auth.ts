@@ -3,6 +3,7 @@ import type { GoogleCalendarInsertResult } from './types';
 
 // Default / fallback Client ID storage key in localStorage
 export const STORAGE_KEY_CLIENT_ID = 'peoplesoft_gcal_client_id';
+export const STORAGE_KEY_USER_EMAIL = 'peoplesoft_user_email';
 
 export function getSavedClientId(): string {
   if (typeof window === 'undefined') return '';
@@ -14,10 +15,23 @@ export function saveClientId(clientId: string): void {
   localStorage.setItem(STORAGE_KEY_CLIENT_ID, clientId.trim());
 }
 
+export function getSavedUserEmail(): string {
+  if (typeof window === 'undefined') return '';
+  return localStorage.getItem(STORAGE_KEY_USER_EMAIL) || '';
+}
+
+export function saveUserEmail(email: string): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(STORAGE_KEY_USER_EMAIL, email.trim());
+}
+
 /**
  * Initiates Google OAuth 2.0 Token Client popup via Google Identity Services
  */
-export function requestGoogleAccessToken(clientId: string): Promise<string> {
+export function requestGoogleAccessToken(
+  clientId: string,
+  userEmail?: string
+): Promise<string> {
   return new Promise((resolve, reject) => {
     const google = (window as any).google;
     if (!google?.accounts?.oauth2) {
@@ -35,7 +49,7 @@ export function requestGoogleAccessToken(clientId: string): Promise<string> {
     }
 
     try {
-      const tokenClient = google.accounts.oauth2.initTokenClient({
+      const initConfig: any = {
         client_id: clientId.trim(),
         scope:
           'https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events',
@@ -56,9 +70,20 @@ export function requestGoogleAccessToken(clientId: string): Promise<string> {
         error_callback: (err: any) => {
           reject(new Error(err?.message || 'Người dùng đã huỷ đăng nhập Google.'));
         },
-      });
+      };
 
-      tokenClient.requestAccessToken({ prompt: 'consent' });
+      if (userEmail && userEmail.trim()) {
+        initConfig.hint = userEmail.trim();
+      }
+
+      const tokenClient = google.accounts.oauth2.initTokenClient(initConfig);
+
+      const requestConfig: any = { prompt: 'consent' };
+      if (userEmail && userEmail.trim()) {
+        requestConfig.hint = userEmail.trim();
+      }
+
+      tokenClient.requestAccessToken(requestConfig);
     } catch (e: any) {
       reject(new Error(`Lỗi khởi tạo token client: ${e.message}`));
     }

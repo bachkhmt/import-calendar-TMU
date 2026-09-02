@@ -24,7 +24,10 @@ import {
   requestGoogleAccessToken,
   createGoogleCalendar,
   insertEventsToGoogleCalendar,
+  getSavedUserEmail,
+  saveUserEmail,
 } from '../core/google-auth';
+import { EmailPromptModal } from './EmailPromptModal';
 
 interface Step4ExportProps {
   recurringEvents: RecurringEvent[];
@@ -56,22 +59,35 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
     null
   );
   const [downloadedIcs, setDownloadedIcs] = useState(false);
+  const [userEmail, setUserEmail] = useState(getSavedUserEmail());
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
 
   const selectedEvents = recurringEvents.filter((e) => e.selected);
 
-  // 1. Export via Google Calendar API
-  const handleSyncToGoogle = async () => {
+  const handleStartImportClick = () => {
     if (!clientId || !clientId.trim()) {
       onOpenOAuthModal();
       return;
     }
+    // Ask for TMU email before starting import
+    setIsEmailModalOpen(true);
+  };
 
+  const handleEmailConfirmed = (email: string) => {
+    setUserEmail(email);
+    saveUserEmail(email);
+    setIsEmailModalOpen(false);
+    executeSyncToGoogle(email);
+  };
+
+  // 1. Export via Google Calendar API with userEmail as hint
+  const executeSyncToGoogle = async (emailToUse: string) => {
     setErrorMessage('');
     setSyncStatus('authorizing');
 
     try {
-      // Step A: Request Token
-      const accessToken = await requestGoogleAccessToken(clientId);
+      // Step A: Request Token with email hint
+      const accessToken = await requestGoogleAccessToken(clientId, emailToUse);
 
       // Step B: Create dedicated calendar
       setSyncStatus('creating_calendar');
@@ -168,6 +184,24 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
             <span className="font-semibold text-indigo-600">
               {selectedEvents.length} môn học
             </span>
+          </div>
+          <div className="border-l border-slate-200 pl-4">
+            <span className="text-slate-400 block">Email TMU nhận lịch:</span>
+            {userEmail ? (
+              <span className="font-semibold text-slate-800 flex items-center gap-1">
+                {userEmail}
+                <button
+                  onClick={() => setIsEmailModalOpen(true)}
+                  className="text-indigo-600 hover:underline text-[11px] font-normal"
+                >
+                  (Đổi)
+                </button>
+              </span>
+            ) : (
+              <span className="text-amber-600 font-medium text-[11px]">
+                Chưa nhập (sẽ hỏi khi bấm Import)
+              </span>
+            )}
           </div>
         </div>
 
@@ -288,7 +322,7 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
         {syncStatus !== 'success' && (
           <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center gap-3">
             <button
-              onClick={handleSyncToGoogle}
+              onClick={handleStartImportClick}
               disabled={
                 syncStatus === 'authorizing' ||
                 syncStatus === 'creating_calendar' ||
@@ -299,8 +333,8 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
               <Calendar className="w-4 h-4" />
               <span>
                 {clientId
-                  ? 'Đăng nhập Google & Tạo Lịch'
-                  : 'Cài đặt Client ID & Thêm vào Google'}
+                  ? 'Import vào Google Calendar'
+                  : 'Cài đặt Client ID & Import Google'}
               </span>
             </button>
 
@@ -360,6 +394,14 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
           <span>Dữ liệu xử lý hoàn toàn tại máy của bạn (Client-side)</span>
         </div>
       </div>
+
+      {/* TMU Email Confirmation Modal */}
+      <EmailPromptModal
+        isOpen={isEmailModalOpen}
+        initialEmail={userEmail}
+        onClose={() => setIsEmailModalOpen(false)}
+        onConfirm={handleEmailConfirmed}
+      />
     </div>
   );
 };
