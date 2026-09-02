@@ -28,6 +28,7 @@ import {
   saveUserEmail,
 } from '../core/google-auth';
 import { EmailPromptModal } from './EmailPromptModal';
+import { useTranslation } from '../core/LanguageContext';
 
 interface Step4ExportProps {
   recurringEvents: RecurringEvent[];
@@ -46,6 +47,7 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
   onPrevStep,
   onReset,
 }) => {
+  const { t } = useTranslation();
   const [syncStatus, setSyncStatus] = useState<
     'idle' | 'authorizing' | 'creating_calendar' | 'inserting_events' | 'success' | 'error'
   >('idle');
@@ -91,7 +93,7 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
 
       // Step B: Create dedicated calendar
       setSyncStatus('creating_calendar');
-      const calendarName = config.calendarName || 'Lịch học PeopleSoft';
+      const calendarName = config.calendarName || 'TMU Class Schedule';
       const createdCal = await createGoogleCalendar(
         accessToken,
         calendarName,
@@ -103,7 +105,7 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
       setProgressInfo({
         current: 0,
         total: selectedEvents.length,
-        currentTitle: 'Bắt đầu thêm...',
+        currentTitle: 'Starting...',
       });
 
       const eventsToInsert = selectedEvents.map((ev) => ({
@@ -125,7 +127,7 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
       setSyncStatus('success');
     } catch (err: any) {
       console.error(err);
-      setErrorMessage(err.message || 'Có lỗi xảy ra khi đồng bộ lịch');
+      setErrorMessage(err.message || 'Error occurred while syncing calendar');
       setSyncStatus('error');
     }
   };
@@ -138,7 +140,7 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${(config.calendarName || 'lich-hoc').replace(/\s+/g, '_')}.ics`;
+      a.download = `${(config.calendarName || 'schedule').replace(/\s+/g, '_')}.ics`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -147,7 +149,7 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
       setDownloadedIcs(true);
       setTimeout(() => setDownloadedIcs(false), 3000);
     } catch (err: any) {
-      alert(`Lỗi khi tạo file .ics: ${err.message}`);
+      alert(`Error creating .ics: ${err.message}`);
     }
   };
 
@@ -157,12 +159,10 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
       <div className="bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-transparent p-5 rounded-2xl border border-blue-100">
         <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
           <Calendar className="w-5 h-5 text-indigo-600" />
-          Bước 4: Xuất Lịch Học
+          {t.step4Title}
         </h2>
         <p className="text-sm text-slate-600 mt-1">
-          Sẵn sàng đưa{' '}
-          <strong className="text-slate-900">{selectedEvents.length} môn học</strong> vào lịch
-          với cấu hình lặp hàng tuần và loại trừ ngày nghỉ tự động.
+          {t.step4Desc.replace('{count}', String(selectedEvents.length))}
         </p>
       </div>
 
@@ -170,23 +170,23 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
       <div className="bg-white p-4 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-4 text-xs">
         <div className="flex flex-wrap items-center gap-4">
           <div>
-            <span className="text-slate-400 block">Tên lịch dự kiến:</span>
+            <span className="text-slate-400 block">{t.targetCalName}</span>
             <span className="font-bold text-slate-800 text-sm">
-              {config.calendarName || 'Lịch học'}
+              {config.calendarName || 'TMU Schedule'}
             </span>
           </div>
           <div className="border-l border-slate-200 pl-4">
-            <span className="text-slate-400 block">Múi giờ:</span>
+            <span className="text-slate-400 block">{t.targetTimezone}</span>
             <span className="font-semibold text-slate-700">{config.timeZone}</span>
           </div>
           <div className="border-l border-slate-200 pl-4">
-            <span className="text-slate-400 block">Số môn sẽ thêm:</span>
+            <span className="text-slate-400 block">{t.classesToExport}</span>
             <span className="font-semibold text-indigo-600">
-              {selectedEvents.length} môn học
+              {selectedEvents.length} {t.coursesCount}
             </span>
           </div>
           <div className="border-l border-slate-200 pl-4">
-            <span className="text-slate-400 block">Email TMU nhận lịch:</span>
+            <span className="text-slate-400 block">{t.tmuEmailLabel}</span>
             {userEmail ? (
               <span className="font-semibold text-slate-800 flex items-center gap-1">
                 {userEmail}
@@ -194,12 +194,12 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
                   onClick={() => setIsEmailModalOpen(true)}
                   className="text-indigo-600 hover:underline text-[11px] font-normal"
                 >
-                  (Đổi)
+                  {t.btnChange}
                 </button>
               </span>
             ) : (
               <span className="text-amber-600 font-medium text-[11px]">
-                Chưa nhập (sẽ hỏi khi bấm Import)
+                {t.emailNotSet}
               </span>
             )}
           </div>
@@ -210,7 +210,7 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
           className="flex items-center gap-1.5 text-xs text-indigo-600 hover:text-indigo-800 font-medium"
         >
           <Key className="w-3.5 h-3.5" />
-          {clientId ? 'Đổi Client ID' : 'Cài đặt Client ID'}
+          {clientId ? t.btnChangeClientId : t.btnSetupClientId}
         </button>
       </div>
 
@@ -222,10 +222,10 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
               <span className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs">
                 1
               </span>
-              Đồng bộ trực tiếp vào Google Calendar (Khuyên dùng)
+              {t.syncGoogleTitle}
             </h3>
             <p className="text-xs text-slate-500 mt-1">
-              Tạo 1 Calendar mới riêng biệt trong tài khoản Google của bạn và chèn từng sự kiện lặp hàng tuần bằng API.
+              {t.syncGoogleDesc}
             </p>
           </div>
         </div>
@@ -234,14 +234,14 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
         {syncStatus === 'authorizing' && (
           <div className="p-4 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center gap-3 text-indigo-800 text-sm">
             <Loader2 className="w-5 h-5 animate-spin text-indigo-600" />
-            <span>Đang mở cửa sổ đăng nhập Google OAuth... Vui lòng cho phép quyền truy cập Lịch trong popup.</span>
+            <span>{t.syncAuthorizing}</span>
           </div>
         )}
 
         {syncStatus === 'creating_calendar' && (
           <div className="p-4 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center gap-3 text-indigo-800 text-sm">
             <Loader2 className="w-5 h-5 animate-spin text-indigo-600" />
-            <span>Đang tạo calendar mới "{config.calendarName}"...</span>
+            <span>{t.syncCreatingCal.replace('{name}', config.calendarName || 'Schedule')}</span>
           </div>
         )}
 
@@ -250,7 +250,7 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
             <div className="flex items-center justify-between text-xs font-semibold text-indigo-900">
               <span className="flex items-center gap-2">
                 <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
-                Đang thêm: {progressInfo.currentTitle}
+                {t.syncInserting.replace('{title}', progressInfo.currentTitle)}
               </span>
               <span>
                 {progressInfo.current} / {progressInfo.total}
@@ -274,7 +274,7 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
             <div className="flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
               <div className="space-y-1">
-                <p className="font-bold">Đồng bộ thất bại</p>
+                <p className="font-bold">{t.syncFailed}</p>
                 <p className="text-xs text-rose-700 font-mono">{errorMessage}</p>
               </div>
             </div>
@@ -283,21 +283,19 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
             errorMessage.toLowerCase().includes('third-party') ? (
               <div className="bg-white/80 p-3.5 rounded-xl border border-rose-200 text-xs space-y-2 text-slate-800">
                 <p className="font-bold text-rose-700 flex items-center gap-1.5">
-                  🏫 Chính sách bảo mật tài khoản trường TMU (@torontomu.ca):
+                  🏫 {t.tmuPolicyTitle}
                 </p>
                 <p className="text-slate-600 leading-relaxed">
-                  Quản trị viên IT trường TMU (CCS) mặc định chặn các ứng dụng web bên ngoài kết nối OAuth trực tiếp vào tài khoản trường.
+                  {t.tmuPolicyDesc}
                 </p>
                 <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-200 text-emerald-900 space-y-1.5">
                   <p className="font-bold flex items-center gap-1">
-                    👉 Giải pháp cực nhanh (Không bị trường chặn):
+                    👉 {t.tmuSolutionTitle}
                   </p>
                   <ol className="list-decimal list-inside space-y-1 text-slate-700 text-[11px]">
+                    <li>{t.tmuStep1}</li>
                     <li>
-                      Bấm nút <strong>Tải file .ics</strong> ngay bên dưới.
-                    </li>
-                    <li>
-                      Mở Google Calendar bằng email trường:{' '}
+                      {t.tmuStep2}{' '}
                       <a
                         href="https://calendar.google.com"
                         target="_blank"
@@ -307,22 +305,20 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
                         calendar.google.com
                       </a>
                     </li>
-                    <li>
-                      Tại cột bên trái, bấm dấu <strong>+</strong> cạnh mục <em>Other calendars</em> &gt; chọn <strong>Import (Nhập)</strong> file .ics vừa tải.
-                    </li>
+                    <li>{t.tmuStep3}</li>
                   </ol>
                   <button
                     onClick={handleDownloadIcs}
                     className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition-colors"
                   >
                     <Download className="w-3.5 h-3.5" />
-                    Tải file .ics ngay bây giờ
+                    {t.btnDownloadIcsNow}
                   </button>
                 </div>
               </div>
             ) : (
               <p className="text-xs text-slate-500 pt-1">
-                Gợi ý: Nếu gặp lỗi OAuth origin, hãy kiểm tra lại <em>Authorized JavaScript origins</em> trên Google Cloud Console đã bao gồm đúng URL hiện tại chưa, hoặc bạn có thể dùng nút <strong>Tải file .ics</strong> bên dưới.
+                Notice: If you see an OAuth origin mismatch, ensure <em>Authorized JavaScript origins</em> on Google Cloud Console includes your current website URL, or simply use the <strong>Download .ics File</strong> button below.
               </p>
             )}
           </div>
@@ -334,11 +330,12 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
             <div className="flex items-center gap-3 text-emerald-800">
               <CheckCircle2 className="w-7 h-7 text-emerald-600 shrink-0" />
               <div>
-                <h4 className="font-bold text-base">Đồng bộ hoàn tất!</h4>
+                <h4 className="font-bold text-base">{t.syncSuccessTitle}</h4>
                 <p className="text-xs text-emerald-700 mt-0.5">
-                  Đã thêm thành công{' '}
-                  <strong>{exportResult.successCount}</strong>/{selectedEvents.length} môn học vào lịch{' '}
-                  <strong>"{exportResult.calendarSummary}"</strong>.
+                  {t.syncSuccessDesc
+                    .replace('{success}', String(exportResult.successCount))
+                    .replace('{total}', String(selectedEvents.length))
+                    .replace('{name}', exportResult.calendarSummary)}
                 </p>
               </div>
             </div>
@@ -350,7 +347,7 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
                 rel="noreferrer"
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-200 transition-all hover:scale-[1.02]"
               >
-                <span>Mở Google Calendar xem lịch ngay</span>
+                <span>{t.btnOpenCalendar}</span>
                 <ExternalLink className="w-4 h-4" />
               </a>
 
@@ -358,7 +355,7 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
                 onClick={onReset}
                 className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 transition-colors"
               >
-                Nhập lịch khác
+                {t.btnImportAnother}
               </button>
             </div>
           </div>
@@ -379,14 +376,14 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
               <Calendar className="w-4 h-4" />
               <span>
                 {clientId
-                  ? 'Import vào Google Calendar'
-                  : 'Cài đặt Client ID & Import Google'}
+                  ? t.btnImportToGoogle
+                  : t.btnImportSetupFirst}
               </span>
             </button>
 
             {!clientId && (
               <span className="text-xs text-amber-600 flex items-center gap-1 font-medium">
-                <AlertCircle className="w-3.5 h-3.5" /> Chưa lưu Client ID (sẽ mở cài đặt)
+                <AlertCircle className="w-3.5 h-3.5" /> {t.clientNotSavedHint}
               </span>
             )}
           </div>
@@ -400,10 +397,10 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
             <span className="w-6 h-6 rounded-full bg-slate-700 text-white flex items-center justify-center text-xs">
               2
             </span>
-            Tải file .ics (iCalendar chuẩn)
+            {t.downloadIcsTitle}
           </h3>
           <p className="text-xs text-slate-500 mt-1">
-            Không cần Google Cloud Project hay tài khoản OAuth. Tải file về máy và nhấp đúp để mở trong Google Calendar, Apple Calendar (Mac/iPhone) hoặc Outlook.
+            {t.downloadIcsDesc}
           </p>
         </div>
 
@@ -414,12 +411,12 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
           {downloadedIcs ? (
             <>
               <Check className="w-4 h-4 text-emerald-600" />
-              <span className="text-emerald-700 font-bold">Đã tải file .ics thành công!</span>
+              <span className="text-emerald-700 font-bold">{t.btnDownloadedSuccess}</span>
             </>
           ) : (
             <>
               <Download className="w-4 h-4 text-slate-600" />
-              <span>Tải file .ics ({selectedEvents.length} môn)</span>
+              <span>{t.btnDownloadIcs.replace('{count}', String(selectedEvents.length))}</span>
             </>
           )}
         </button>
@@ -432,12 +429,12 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
           className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl font-semibold text-sm text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 transition-all"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Quay lại xem trước</span>
+          <span>{t.btnBack}</span>
         </button>
 
         <div className="text-xs text-slate-400 flex items-center gap-1.5">
           <ShieldCheck className="w-4 h-4 text-emerald-600" />
-          <span>Dữ liệu xử lý hoàn toàn tại máy của bạn (Client-side)</span>
+          <span>{t.clientSidePrivacy}</span>
         </div>
       </div>
 

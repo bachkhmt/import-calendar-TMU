@@ -15,6 +15,7 @@ import { parsePeopleSoftWeeklySchedule } from './core/parser';
 import { mergeParsedWeeks } from './core/merger';
 import { buildRecurringEvents } from './core/recurrence';
 import { getSavedClientId } from './core/google-auth';
+import { LanguageProvider, useTranslation } from './core/LanguageContext';
 import { Navbar } from './components/Navbar';
 import { OAuthHelpModal } from './components/OAuthHelpModal';
 import { Step1Paste } from './components/Step1Paste';
@@ -22,7 +23,9 @@ import { Step2Config } from './components/Step2Config';
 import { Step3Preview } from './components/Step3Preview';
 import { Step4Export } from './components/Step4Export';
 
-export function App() {
+function AppContent() {
+  const { t } = useTranslation();
+
   // Step state (1..4)
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
 
@@ -36,12 +39,12 @@ export function App() {
   const [clientId, setClientId] = useState('');
   const [isOAuthModalOpen, setIsOAuthModalOpen] = useState(false);
 
-  // Initialize client ID from localStorage and detect default timezone
+  // Initialize client ID from localStorage
   useEffect(() => {
     setClientId(getSavedClientId());
   }, []);
 
-  // Mặc định luôn theo múi giờ Canada (Toronto - EST/EDT) cho trường TMU
+  // Default timezone is strictly America/Toronto (Canada Eastern Time) for TMU
   const defaultTimezone = 'America/Toronto';
 
   // Semester Config state
@@ -49,7 +52,7 @@ export function App() {
     semesterStart: '',
     semesterEnd: '',
     timeZone: defaultTimezone,
-    calendarName: 'TKB Học Kỳ',
+    calendarName: 'TMU Class Schedule',
     breaks: [],
   });
 
@@ -78,8 +81,8 @@ export function App() {
         semesterStart: firstWeek.weekOfMonday,
         semesterEnd: prev.semesterEnd || fmt(end),
         calendarName:
-          prev.calendarName === 'TKB Học Kỳ'
-            ? `TKB Fall ${start.getFullYear()}`
+          prev.calendarName === 'TMU Class Schedule' || prev.calendarName === 'TKB Học Kỳ'
+            ? `TMU Fall ${start.getFullYear()} Schedule`
             : prev.calendarName,
       }));
     }
@@ -155,7 +158,7 @@ export function App() {
 
   // Full reset
   const handleReset = () => {
-    if (window.confirm('Bạn có chắc muốn làm mới toàn bộ dữ liệu đã nhập?')) {
+    if (window.confirm(t.confirmReset)) {
       setWeeks([{ weekOfMonday: '', events: [], rawText: '' }]);
       setActiveWeekIndex(0);
       setUserEventOverrides({});
@@ -164,10 +167,10 @@ export function App() {
   };
 
   const stepList = [
-    { number: 1, label: 'Dán TKB', icon: FileText },
-    { number: 2, label: 'Cấu hình Học kỳ', icon: Settings },
-    { number: 3, label: 'Xem trước Môn', icon: ListChecks },
-    { number: 4, label: 'Xuất Calendar', icon: Calendar },
+    { number: 1, label: t.step1, icon: FileText },
+    { number: 2, label: t.step2, icon: Settings },
+    { number: 3, label: t.step3, icon: ListChecks },
+    { number: 4, label: t.step4, icon: Calendar },
   ];
 
   return (
@@ -274,7 +277,7 @@ export function App() {
       {/* Footer */}
       <footer className="py-6 text-center text-xs text-slate-400 border-t border-slate-200 mt-12 bg-white">
         <p>
-          PeopleSoft Schedule to Google Calendar &bull; Client-Side Only &bull; Không lưu trữ dữ liệu người dùng
+          PeopleSoft Schedule to Google Calendar &bull; 100% Client-Side &bull; No data stored on server
         </p>
       </footer>
 
@@ -285,6 +288,14 @@ export function App() {
         onSaved={(id) => setClientId(id)}
       />
     </div>
+  );
+}
+
+export function App() {
+  return (
+    <LanguageProvider>
+      <AppContent />
+    </LanguageProvider>
   );
 }
 

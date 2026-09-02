@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Mail, ArrowRight, School, ShieldCheck } from 'lucide-react';
+import { useTranslation } from '../core/LanguageContext';
 
 interface EmailPromptModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ export const EmailPromptModal: React.FC<EmailPromptModalProps> = ({
   onClose,
   onConfirm,
 }) => {
+  const { t } = useTranslation();
   const [username, setUsername] = useState('');
   const [useCustomDomain, setUseCustomDomain] = useState(false);
   const [customEmail, setCustomEmail] = useState('');
@@ -83,10 +85,10 @@ export const EmailPromptModal: React.FC<EmailPromptModalProps> = ({
             </div>
             <div>
               <h2 className="text-base font-bold text-slate-900 leading-tight">
-                Xác nhận Email TMU
+                {t.emailModalTitle}
               </h2>
               <p className="text-[11px] text-slate-500">
-                Toronto Metropolitan University
+                {t.emailModalSubtitle}
               </p>
             </div>
           </div>
@@ -102,10 +104,10 @@ export const EmailPromptModal: React.FC<EmailPromptModalProps> = ({
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide">
-              Email Google Workspace của bạn:
+              {t.emailModalLabel}
             </label>
             <p className="text-xs text-slate-500 leading-relaxed">
-              Nhập email để hệ thống tự động chọn đúng tài khoản Google Calendar trường của bạn khi đăng nhập.
+              {t.emailModalDesc}
             </p>
           </div>
 
@@ -121,7 +123,7 @@ export const EmailPromptModal: React.FC<EmailPromptModalProps> = ({
                   autoFocus
                   value={username}
                   onChange={(e) => handleUsernameChange(e.target.value)}
-                  placeholder="username (ví dụ: sylvia.nguyen)"
+                  placeholder={t.emailUsernamePlaceholder}
                   className="flex-1 px-2.5 py-2.5 text-sm text-slate-900 focus:outline-none font-medium"
                 />
                 <span className="inline-flex items-center px-3.5 bg-slate-100 border-l border-slate-200 text-xs font-bold text-slate-600 select-none">
@@ -135,7 +137,7 @@ export const EmailPromptModal: React.FC<EmailPromptModalProps> = ({
                   onClick={() => setUseCustomDomain(true)}
                   className="text-[11px] text-indigo-600 hover:text-indigo-800 hover:underline"
                 >
-                  Dùng email khác (không phải @torontomu.ca)
+                  {t.btnUseOtherEmail}
                 </button>
               </div>
             </div>
@@ -162,7 +164,7 @@ export const EmailPromptModal: React.FC<EmailPromptModalProps> = ({
                   onClick={() => setUseCustomDomain(false)}
                   className="text-[11px] text-indigo-600 hover:text-indigo-800 hover:underline"
                 >
-                  Quay lại định dạng @torontomu.ca
+                  {t.btnBackToTmu}
                 </button>
               </div>
             </div>
@@ -171,7 +173,7 @@ export const EmailPromptModal: React.FC<EmailPromptModalProps> = ({
           <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/80 text-[11px] text-slate-500 flex items-start gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
             <span>
-              Email này chỉ dùng làm <em>login hint</em> trong Google OAuth để trình duyệt chọn đúng tài khoản TMU, không lưu trữ trên máy chủ nào.
+              {t.emailHintNotice}
             </span>
           </div>
 
@@ -182,7 +184,7 @@ export const EmailPromptModal: React.FC<EmailPromptModalProps> = ({
               onClick={onClose}
               className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-colors"
             >
-              Hủy
+              {t.btnCancel}
             </button>
             <button
               type="submit"
@@ -193,7 +195,7 @@ export const EmailPromptModal: React.FC<EmailPromptModalProps> = ({
                   : 'bg-slate-300 cursor-not-allowed shadow-none'
               }`}
             >
-              <span>Xác nhận & Bắt đầu Import</span>
+              <span>{t.btnConfirmImport}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>

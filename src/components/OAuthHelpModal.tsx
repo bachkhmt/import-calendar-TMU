@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Key, Check, ExternalLink, HelpCircle, ShieldCheck } from 'lucide-react';
 import { getSavedClientId, saveClientId } from '../core/google-auth';
+import { useTranslation } from '../core/LanguageContext';
 
 interface OAuthHelpModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ export const OAuthHelpModal: React.FC<OAuthHelpModalProps> = ({
   onClose,
   onSaved,
 }) => {
+  const { t } = useTranslation();
   const [clientId, setClientId] = useState('');
   const [copied, setCopied] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
@@ -50,7 +52,7 @@ export const OAuthHelpModal: React.FC<OAuthHelpModalProps> = ({
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
           <div className="flex items-center gap-2 text-slate-800">
             <Key className="w-5 h-5 text-indigo-600" />
-            <h2 className="text-lg font-bold">Cấu hình Google OAuth Client ID</h2>
+            <h2 className="text-lg font-bold">{t.oauthModalTitle}</h2>
           </div>
           <button
             onClick={onClose}
@@ -64,18 +66,18 @@ export const OAuthHelpModal: React.FC<OAuthHelpModalProps> = ({
           {/* Client ID Input */}
           <div className="bg-indigo-50/60 p-4 rounded-xl border border-indigo-100 space-y-3">
             <label className="block text-sm font-semibold text-slate-800">
-              Google Client ID của bạn
+              {t.oauthInputLabel}
             </label>
             <input
               type="text"
               value={clientId}
               onChange={(e) => setClientId(e.target.value)}
-              placeholder="VD: 123456789-abcdefghijk.apps.googleusercontent.com"
+              placeholder={t.oauthInputPlaceholder}
               className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono shadow-sm"
             />
             <p className="text-xs text-slate-500 flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-              Client ID chỉ lưu trong trình duyệt của bạn (<code className="bg-slate-200/70 px-1 rounded">localStorage</code>), không bao giờ gửi đến máy chủ nào.
+              {t.oauthPrivacyNotice}
             </p>
           </div>
 
@@ -85,7 +87,7 @@ export const OAuthHelpModal: React.FC<OAuthHelpModalProps> = ({
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
             >
-              Đóng
+              {t.btnClose}
             </button>
             <button
               onClick={handleSave}
@@ -93,10 +95,10 @@ export const OAuthHelpModal: React.FC<OAuthHelpModalProps> = ({
             >
               {savedSuccess ? (
                 <>
-                  <Check className="w-4 h-4" /> Đã lưu!
+                  <Check className="w-4 h-4" /> {t.savedSuccess}
                 </>
               ) : (
-                'Lưu Client ID'
+                t.btnSaveClientId
               )}
             </button>
           </div>
@@ -106,13 +108,12 @@ export const OAuthHelpModal: React.FC<OAuthHelpModalProps> = ({
             <div className="flex items-center gap-2 text-slate-700">
               <HelpCircle className="w-4 h-4 text-slate-500" />
               <h3 className="font-semibold text-sm uppercase tracking-wide">
-                Hướng dẫn tạo Client ID miễn phí (2 phút)
+                {t.guideTitle}
               </h3>
             </div>
 
             <ol className="space-y-3.5 text-xs text-slate-600 leading-relaxed list-decimal list-inside">
               <li>
-                Truy cập{' '}
                 <a
                   href="https://console.cloud.google.com/"
                   target="_blank"
@@ -121,47 +122,32 @@ export const OAuthHelpModal: React.FC<OAuthHelpModalProps> = ({
                 >
                   Google Cloud Console <ExternalLink className="w-3 h-3" />
                 </a>{' '}
-                và tạo một Project mới (đặt tên ví dụ: <em>PeopleSoft Calendar Sync</em>).
+                {t.guideStep1}
               </li>
               <li>
-                Vào mục <strong>APIs & Services &gt; Library</strong>, tìm kiếm{' '}
-                <span className="font-semibold text-slate-800">"Google Calendar API"</span> và bấm{' '}
-                <strong>Enable (Bật)</strong>.
+                {t.guideStep2}
               </li>
               <li>
-                Vào mục <strong>APIs & Services &gt; OAuth consent screen</strong>:
-                <ul className="list-disc list-inside pl-4 mt-1 space-y-1 text-slate-500">
-                  <li>Chọn User Type: <strong>External</strong></li>
-                  <li>Điền App name & Email của bạn rồi bấm Save and Continue</li>
-                  <li>Tại bước <strong>Test users</strong>: thêm địa chỉ Gmail của chính bạn để cấp quyền test</li>
-                </ul>
+                {t.guideStep3}
               </li>
               <li>
-                Vào mục <strong>APIs & Services &gt; Credentials</strong>:
-                <ul className="list-disc list-inside pl-4 mt-1 space-y-1 text-slate-500">
-                  <li>Bấm <strong>Create Credentials</strong> &gt; chọn <strong>OAuth Client ID</strong></li>
-                  <li>Application type: chọn <strong>Web application</strong></li>
-                  <li>
-                    Tại mục <strong>Authorized JavaScript origins</strong>: bấm Add URI và dán địa chỉ web này:
-                    <div className="flex items-center gap-2 mt-1.5">
-                      <code className="bg-slate-100 text-slate-800 px-2 py-1 rounded text-[11px] font-mono border border-slate-200">
-                        {currentOrigin}
-                      </code>
-                      <button
-                        onClick={copyOrigin}
-                        className="px-2 py-1 text-[11px] font-medium bg-slate-200 hover:bg-slate-300 text-slate-700 rounded transition-colors"
-                      >
-                        {copied ? 'Đã chép!' : 'Copy'}
-                      </button>
-                    </div>
-                  </li>
-                  <li>Bấm <strong>Create</strong>, sau đó copy chuỗi <strong>Client ID</strong> dán vào ô bên trên!</li>
-                </ul>
+                {t.guideStep4}
+                <div className="flex items-center gap-2 mt-1.5">
+                  <code className="bg-slate-100 text-slate-800 px-2 py-1 rounded text-[11px] font-mono border border-slate-200">
+                    {currentOrigin}
+                  </code>
+                  <button
+                    onClick={copyOrigin}
+                    className="px-2 py-1 text-[11px] font-medium bg-slate-200 hover:bg-slate-300 text-slate-700 rounded transition-colors"
+                  >
+                    {copied ? t.guideCopied : t.guideCopy}
+                  </button>
+                </div>
               </li>
             </ol>
 
             <div className="bg-amber-50 p-3 rounded-lg border border-amber-200 text-xs text-amber-800">
-              💡 <strong>Mẹo:</strong> Nếu chưa muốn tạo Google Cloud Project, bạn vẫn có thể sử dụng nút <strong>"Tải file .ics"</strong> ở bước cuối để thêm lịch vào Google Calendar / Apple Calendar ngay lập tức mà không cần cấu hình OAuth!
+              💡 {t.guideTip}
             </div>
           </div>
         </div>
